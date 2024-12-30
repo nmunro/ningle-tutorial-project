@@ -1,9 +1,10 @@
-<html>
-    <head>
-        <title>Ningle Tutorial Project</title>
-    </head>
-    <body>
-      <h1>Ningle Tutorial Project</h1>
-      <p>This is working!</p>
-    </body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Hi, {{ user.username }}!</h1>
+    {% for post in posts %}
+      <div>
+        <p>{{ post.author.username }} says: <b>{{ post.content }}</b></p>
+      </div>
+    {% endfor %}
+{% endblock %}

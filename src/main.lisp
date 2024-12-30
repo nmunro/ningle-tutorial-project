@@ -9,7 +9,12 @@
 
 (setf (ningle:route *app* "/")
       (lambda (params)
-        (djula:render-template* "index.html")))
+        (let ((user  (list :username "NMunro"))
+              (posts (list (list :author (list :username "Bob")  :content "Experimenting with Dylan")
+                           (list :author (list :username "Jane") :content "Wrote in my diary today"))))
+          (djula:render-template* "index.html" nil :title "Home"
+                                                   :user user
+                                                   :posts posts))))
 
 (defmethod ningle:not-found ((app ningle:<app>))
     (declare (ignore app))
