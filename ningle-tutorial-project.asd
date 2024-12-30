@@ -4,7 +4,8 @@
   :license "BSD3-Clause"
   :description ""
   :depends-on (:ningle
-               :clack)
+               :clack
+               :djula)
   :components ((:module "src"
                 :components
                 ((:file "main"))))

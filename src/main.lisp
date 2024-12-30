@@ -9,7 +9,7 @@
 
 (setf (ningle:route *app* "/")
       (lambda (params)
-        "Hello world"))
+        (djula:render-template* "index.html")))
 
 (defmethod ningle:not-found ((app ningle:<app>))
     (declare (ignore app))
@@ -17,6 +17,7 @@
     "Not Found")
 
 (defun start (&key (server :woo) (address "127.0.0.1") (port 8000))
+    (djula:add-template-directory (asdf:system-relative-pathname :ningle-tutorial-project "src/templates/"))
     (clack:clackup
      *app*
      :server server
