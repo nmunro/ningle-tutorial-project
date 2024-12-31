@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+          <h1>{{ error }}</h1>
+          <img src="{% static "images/lua.jpg" %}" alt="A picture of a dog looking sad and confused" class="error-404">
+        </div>
+    </div>
+</div>
+{% endblock %}
