@@ -6,9 +6,14 @@
         {% else %}
             <title>Welcome to Y</title>
         {% endif %}
+        <link rel="stylesheet" href="/public/css/main.css"/>
+        <script src="/public/js/main.js"></script>
     </head>
     <body>
-        <div>Y: <a href="/">Home</a></div>
+        <div class="container">
+            <img id="logo" src="/public/images/logo.jpg"/>
+            <div>Y: <a href="/">Home</a></div>
+        </div>
         <hr>
         {% block content %}
         {% endblock %}

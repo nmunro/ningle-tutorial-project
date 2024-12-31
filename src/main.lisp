@@ -24,7 +24,11 @@
 (defun start (&key (server :woo) (address "127.0.0.1") (port 8000))
     (djula:add-template-directory (asdf:system-relative-pathname :ningle-tutorial-project "src/templates/"))
     (clack:clackup
-     *app*
+      (lack.builder:builder :accesslog
+                            (:static
+                             :root (asdf:system-relative-pathname :ningle-tutorial-project #P"src/static/")
+                             :path "/public/")
+                            *app*)
      :server server
      :address address
      :port port))
