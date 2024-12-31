@@ -26,7 +26,7 @@
     (clack:clackup
       (lack.builder:builder :accesslog
                             (:static
-                             :root (asdf:system-relative-pathname :ningle-tutorial-project #P"src/static/")
+                             :root (asdf:system-relative-pathname :ningle-tutorial-project "src/static/")
                              :path "/public/")
                             *app*)
      :server server
