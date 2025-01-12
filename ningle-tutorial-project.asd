@@ -3,12 +3,16 @@
   :author "nmunro"
   :license "BSD3-Clause"
   :description ""
-  :depends-on (:ningle
-               :clack
-               :djula)
+  :depends-on (:clack
+               :ningle
+               :djula
+               :cl-forms
+               :cl-forms.djula
+               :cl-forms.ningle)
   :components ((:module "src"
                 :components
-                ((:file "main"))))
+                ((:file "forms")
+                 (:file "main"))))
   :in-order-to ((test-op (test-op "ningle-tutorial-project/tests"))))
 
 (defsystem "ningle-tutorial-project/tests"

@@ -1,5 +1,11 @@
 (defpackage ningle-tutorial-project
   (:use :cl)
+  (:import-from
+   :ningle-tutorial-project/forms
+   #:register
+   #:email
+   #:password
+   #:password-verify)
   (:export #:start
            #:stop))
 
@@ -16,6 +22,27 @@
                                                    :user user
                                                    :posts posts))))
 
+(setf (ningle:route *app* "/register" :method :GET)
+    (lambda (params)
+        (let ((form (cl-forms:find-form 'ningle-tutorial-project/forms:register)))
+            (djula:render-template* "form.html" nil :form form))))
+
+(setf (ningle:route *app* "/register" :method :POST)
+    (lambda (params)
+        (handler-case
+            (let ((form (forms:find-form 'ningle-tutorial-project/forms:register)))
+                (cl-forms:handle-request form) ; Can throw an error if CSRF fails
+                (multiple-value-bind (valid errors)
+                    (cl-forms:validate-form form)
+                  (when valid
+                      (cl-forms:with-form-field-values (email password password-verify) form
+                        (format t "Testing: email - ~A, password - ~A, password-verify - ~A~%" email password password-verify)))
+                  (djula:render-template* "form.html" nil :form form)))
+
+            (simple-error (csrf-error)
+                (setf (lack.response:response-status ningle:*response*) 403)
+                (djula:render-template* "error.html" nil :error csrf-error)))))
+
 (defmethod ningle:not-found ((app ningle:<app>))
     (declare (ignore app))
     (setf (lack.response:response-status ningle:*response*) 404)
@@ -25,7 +52,7 @@
     (djula:add-template-directory (asdf:system-relative-pathname :ningle-tutorial-project "src/templates/"))
     (djula:set-static-url "/public/")
     (clack:clackup
-      (lack.builder:builder :accesslog
+      (lack.builder:builder :session
                             (:static
                              :root (asdf:system-relative-pathname :ningle-tutorial-project "src/static/")
                              :path "/public/")
