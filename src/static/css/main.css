@@ -6,3 +6,37 @@
 .error-404 {
     height: 75vh;
 }
+
+/* Apply Bootstrap classes to the email and password fields */
+form#signup input[type="email"],
+form#signup input[type="password"] {
+    /* Bootstrap's .form-control class for inputs */
+    composes: form-control;
+    /* Add additional spacing if needed */
+    margin-bottom: 1rem;
+    width: 100%; /* Make the input full width */
+}
+
+form#signup select {
+    composes: form-select;
+    width: 100%; /* Make the input full width */
+}
+
+/* Style the submit button using Bootstrap's .btn and .btn-primary classes */
+form#signup input[type="submit"] {
+    composes: btn btn-primary;
+    width: 100%; /* Full-width button */
+}
+
+/* Optional: Apply Bootstrap's form-group styling to parent divs */
+form#signup div {
+    composes: mb-3;
+}
+
+/* Optional: Style labels using Bootstrap's .form-label class */
+form#signup label {
+    composes: form-label;
+    font-weight: bold; /* Optional: Make the label bold for emphasis */
+    margin-bottom: 0.5rem; /* Add space between the label and input */
+}
+
