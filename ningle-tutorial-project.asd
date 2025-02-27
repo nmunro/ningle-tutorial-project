@@ -6,12 +6,19 @@
   :depends-on (:clack
                :ningle
                :djula
+               :cl-dotenv
                :cl-forms
                :cl-forms.djula
-               :cl-forms.ningle)
+               :cl-forms.ningle
+               :postmodern
+               :foo.lisp.lack-middleware-postmodern
+               :cl-yesql
+               :cl-yesql/postmodern)
   :components ((:module "src"
                 :components
                 ((:file "forms")
+                 (:file "migrations")
+                 (:file "user")
                  (:file "main"))))
   :in-order-to ((test-op (test-op "ningle-tutorial-project/tests"))))
 

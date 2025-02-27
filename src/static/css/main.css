@@ -9,6 +9,7 @@
 
 /* Apply Bootstrap classes to the email and password fields */
 form#signup input[type="email"],
+form#signup input[type="text"],
 form#signup input[type="password"] {
     /* Bootstrap's .form-control class for inputs */
     composes: form-control;
