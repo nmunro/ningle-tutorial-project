@@ -1,6 +1,6 @@
 #lang cl-yesql/postmodern
 
--- name: 0001-users-initial-migration @execute
+-- name: 0001-users-initial @execute
 -- Returns nothing
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,

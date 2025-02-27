@@ -45,7 +45,7 @@
 
 (defun migrate-user ()
     (postmodern:with-connection `(,(getenv "POSTGRES_DB_NAME") ,(getenv "POSTGRES_DB_USER") ,(getenv "POSTGRES_DB_PASSWORD") ,(getenv "POSTGRES_DB_HOST"))
-        (0001-users-initial-migration)
+        (0001-users-initial)
         (0002-users-add-username)
         (0003-users-add-password)))
 
