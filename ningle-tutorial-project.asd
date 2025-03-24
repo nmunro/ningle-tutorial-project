@@ -4,6 +4,7 @@
   :license "BSD3-Clause"
   :description ""
   :depends-on (:clack
+               :cl-dotenv
                :ningle
                :djula
                :cl-forms

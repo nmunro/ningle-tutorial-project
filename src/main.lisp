@@ -13,6 +13,8 @@
 
 (defvar *app* (make-instance 'ningle:app))
 
+(dotenv:load-env (asdf:system-relative-pathname :ningle-tutorial-project ".env"))
+
 (setf (ningle:route *app* "/")
       (lambda (params)
         (let ((user  (list :username "NMunro"))
@@ -47,6 +49,7 @@
     (djula:render-template* "error.html" nil :error "Not Found"))
 
 (defun start (&key (server :woo) (address "127.0.0.1") (port 8000))
+    (format t "Test: ~A~%" (uiop:getenv "DBPATH"))
     (djula:add-template-directory (asdf:system-relative-pathname :ningle-tutorial-project "src/templates/"))
     (djula:set-static-url "/public/")
     (clack:clackup
