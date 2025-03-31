@@ -5,14 +5,19 @@
   :description ""
   :depends-on (:clack
                :cl-dotenv
-               :ningle
                :djula
                :cl-forms
                :cl-forms.djula
-               :cl-forms.ningle)
+               :cl-forms.ningle
+               :ingle
+               :mito
+               :mito-auth
+               :ningle)
   :components ((:module "src"
                 :components
-                ((:file "forms")
+                ((:file "models")
+                 (:file "migrations")
+                 (:file "forms")
                  (:file "main"))))
   :in-order-to ((test-op (test-op "ningle-tutorial-project/tests"))))
 

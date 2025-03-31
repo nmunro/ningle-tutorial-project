@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <!-- Posts Section -->
+    <div class="row">
+        <div class="col-12">
+            {% for user in users %}
+                <div class="row mb-4">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><a href="/people/{{ user.username }}">{{ user.username }}</a></h5>
+                                <p class="card-text"><a href="/people/{{ user.email }}">{{ user.email }}</a></p>
+                                <p class="text-muted small"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            {% if not users %}
+                <div class="row">
+                    <div class="col text-center">
+                        <p class="text-muted">No users to display.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
