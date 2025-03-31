@@ -7,36 +7,39 @@
     height: 75vh;
 }
 
-/* Apply Bootstrap classes to the email and password fields */
+form#signup input {
+    display: block;  /* Ensure inputs take up the full width */
+    width: 100% !important; /* Override any conflicting styles */
+    max-width: 100%; /* Ensure no unnecessary constraints */
+    box-sizing: border-box;
+}
+
 form#signup input[type="email"],
+form#signup input[type="text"],
 form#signup input[type="password"] {
-    /* Bootstrap's .form-control class for inputs */
-    composes: form-control;
-    /* Add additional spacing if needed */
-    margin-bottom: 1rem;
+    @extend .form-control; /* Apply Bootstrap's .form-control */
+    display: block; /* Ensure they are block-level elements */
     width: 100%; /* Make the input full width */
+    margin-bottom: 1rem; /* Spacing */
 }
 
 form#signup select {
-    composes: form-select;
-    width: 100%; /* Make the input full width */
+    @extend .form-select;
+    width: 100%;
 }
 
-/* Style the submit button using Bootstrap's .btn and .btn-primary classes */
 form#signup input[type="submit"] {
-    composes: btn btn-primary;
-    width: 100%; /* Full-width button */
+    @extend .btn;
+    @extend .btn-primary;
+    width: 100%;
 }
 
-/* Optional: Apply Bootstrap's form-group styling to parent divs */
 form#signup div {
-    composes: mb-3;
+    @extend .mb-3;
 }
 
-/* Optional: Style labels using Bootstrap's .form-label class */
 form#signup label {
-    composes: form-label;
-    font-weight: bold; /* Optional: Make the label bold for emphasis */
-    margin-bottom: 0.5rem; /* Add space between the label and input */
+    @extend .form-label;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
 }
-
