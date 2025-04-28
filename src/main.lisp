@@ -79,7 +79,7 @@
     (setf (lack.response:response-status ningle:*response*) 404)
     (djula:render-template* "error.html" nil :title "Error" :error "Not Found"))
 
-(defun start (&key (server :woo) (address "127.0.0.1") (port 8000) (sql-type :sqlite3))
+(defun start (&key (server :woo) (address "127.0.0.1") (port 8000))
     (djula:add-template-directory (asdf:system-relative-pathname :ningle-tutorial-project "src/templates/"))
     (djula:set-static-url "/public/")
     (clack:clackup
@@ -87,7 +87,7 @@
        :session
        `(:mito
           (:sqlite3
-           :database-name ,(or (uiop:getenv "SQLITE_DB_NAME") (error "Environment variable SQLITE_DB_NAME is not set!"))))
+           :database-name ,(uiop:getenv "SQLITE_DB_NAME")))
        (:static
         :root (asdf:system-relative-pathname :ningle-tutorial-project "src/static/")
         :path "/public/")
