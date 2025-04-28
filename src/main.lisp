@@ -86,12 +86,12 @@
       (lack.builder:builder
        :session
        `(:mito
-          (:mysql
-           :database-name ,(uiop:native-namestring (uiop:parse-unix-namestring (uiop:getenv "MYSQL_DB_NAME")))
-           :username ,(uiop:getenv "MYSQL_USER")
-           :password ,(uiop:getenv "MYSQL_PASSWORD")
-           :host ,(uiop:getenv "MYSQL_ADDRESS")
-           :port ,(parse-integer (uiop:getenv "MYSQL_PORT"))))
+          (:postgres
+           :database-name ,(uiop:native-namestring (uiop:parse-unix-namestring (uiop:getenv "POSTGRES_DB_NAME")))
+           :username ,(uiop:getenv "POSTGRES_USER")
+           :password ,(uiop:getenv "POSTGRES_PASSWORD")
+           :host ,(uiop:getenv "POSTGRES_ADDRESS")
+           :port ,(parse-integer (uiop:getenv "POSTGRES_PORT"))))
        (:static
         :root (asdf:system-relative-pathname :ningle-tutorial-project "src/static/")
         :path "/public/")

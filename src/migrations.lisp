@@ -9,12 +9,12 @@
   (dotenv:load-env (asdf:system-relative-pathname :ningle-tutorial-project ".env"))
   (format t "Applying migrations...~%")
   (mito:connect-toplevel
-    :mysql
-    :database-name (uiop:native-namestring (uiop:parse-unix-namestring (uiop:getenv "MYSQL_DB_NAME")))
-    :username (uiop:getenv "MYSQL_USER")
-    :password (uiop:getenv "MYSQL_PASSWORD")
-    :host (uiop:getenv "MYSQL_ADDRESS")
-    :port (parse-integer (uiop:getenv "MYSQL_PORT")))
+    :postgres
+    :database-name (uiop:getenv "POSTGRES_DB_NAME")
+    :host (uiop:getenv "POSTGRES_ADDRESS")
+    :port (parse-integer (uiop:getenv "POSTGRES_PORT"))
+    :username (uiop:getenv "POSTGRES_USER")
+    :password (uiop:getenv "POSTGRES_PASSWORD"))
   (mito:ensure-table-exists 'ningle-tutorial-project/models:user)
   (mito:migrate-table 'ningle-tutorial-project/models:user)
   (mito:disconnect-toplevel)
