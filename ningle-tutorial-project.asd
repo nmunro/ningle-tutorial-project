@@ -3,19 +3,22 @@
   :author "nmunro"
   :license "BSD3-Clause"
   :description ""
-  :depends-on (:clack
-               :cl-dotenv
+  :depends-on (:cl-dotenv
+               :clack
                :djula
                :cl-forms
                :cl-forms.djula
                :cl-forms.ningle
+               :envy
+               :envy-ningle
                :ingle
                :mito
                :mito-auth
                :ningle)
   :components ((:module "src"
                 :components
-                ((:file "models")
+                ((:file "config")
+                 (:file "models")
                  (:file "migrations")
                  (:file "forms")
                  (:file "main"))))

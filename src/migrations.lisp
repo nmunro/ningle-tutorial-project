@@ -6,16 +6,12 @@
 
 (defun migrate ()
   "Explicitly apply migrations when called."
-  (dotenv:load-env (asdf:system-relative-pathname :ningle-tutorial-project ".env"))
   (format t "Applying migrations...~%")
-  (mito:connect-toplevel
-    :postgres
-    :database-name (uiop:getenv "POSTGRES_DB_NAME")
-    :host (uiop:getenv "POSTGRES_ADDRESS")
-    :port (parse-integer (uiop:getenv "POSTGRES_PORT"))
-    :username (uiop:getenv "POSTGRES_USER")
-    :password (uiop:getenv "POSTGRES_PASSWORD"))
-  (mito:ensure-table-exists 'ningle-tutorial-project/models:user)
-  (mito:migrate-table 'ningle-tutorial-project/models:user)
-  (mito:disconnect-toplevel)
-  (format t "Migrations complete.~%"))
+  (multiple-value-bind (backend args) (envy-ningle:extract-mito-config :ningle-tutorial-project/config)
+    (unless backend
+      (error "No :mito middleware config found in ENVY config."))
+    (apply #'mito:connect-toplevel backend args)
+    (mito:ensure-table-exists 'ningle-tutorial-project/models:user)
+    (mito:migrate-table 'ningle-tutorial-project/models:user)
+    (mito:disconnect-toplevel)
+    (format t "Migrations complete.~%")))

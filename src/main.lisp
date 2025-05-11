@@ -14,8 +14,6 @@
 
 (defvar *app* (make-instance 'ningle:app))
 
-(dotenv:load-env (asdf:system-relative-pathname :ningle-tutorial-project ".env"))
-
 (setf (ningle:route *app* "/")
       (lambda (params)
         (let ((user  (list :username "NMunro"))
@@ -33,8 +31,8 @@
         (let* ((person (ingle:get-param :person params))
                (user (first (mito:select-dao
                               'ningle-tutorial-project/models:user
-                              (sxql:where (:or (:= :username person)
-                                               (:= :email person)))))))
+                              (where (:or (:= :username person)
+                                          (:= :email person)))))))
           (djula:render-template* "person.html" nil :title "Person" :user user))))
 
 (setf (ningle:route *app* "/register" :method '(:GET :POST))
@@ -83,19 +81,7 @@
     (djula:add-template-directory (asdf:system-relative-pathname :ningle-tutorial-project "src/templates/"))
     (djula:set-static-url "/public/")
     (clack:clackup
-      (lack.builder:builder
-       :session
-       `(:mito
-          (:postgres
-           :database-name ,(uiop:native-namestring (uiop:parse-unix-namestring (uiop:getenv "POSTGRES_DB_NAME")))
-           :username ,(uiop:getenv "POSTGRES_USER")
-           :password ,(uiop:getenv "POSTGRES_PASSWORD")
-           :host ,(uiop:getenv "POSTGRES_ADDRESS")
-           :port ,(parse-integer (uiop:getenv "POSTGRES_PORT"))))
-       (:static
-        :root (asdf:system-relative-pathname :ningle-tutorial-project "src/static/")
-        :path "/public/")
-       *app*)
+     (lack.builder:builder (envy-ningle:build-middleware :ningle-tutorial-project/config *app*))
      :server server
      :address address
      :port port))
