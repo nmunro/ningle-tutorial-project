@@ -12,6 +12,7 @@
   `(:debug T
     :middleware ((:session)
                  (:mito (:sqlite3 :database-name ,(uiop:getenv "SQLITE_DB_NAME")))
+                 (:mount "/auth" ,ningle-auth:*app*)
                  (:static :root ,(asdf:system-relative-pathname :ningle-tutorial-project "src/static/") :path "/public/"))))
 
 (defconfig |mysql|
