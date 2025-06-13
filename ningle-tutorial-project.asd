@@ -14,7 +14,8 @@
                :ingle
                :mito
                :mito-auth
-               :ningle)
+               :ningle
+               :ningle-auth)
   :components ((:module "src"
                 :components
                 ((:file "config")

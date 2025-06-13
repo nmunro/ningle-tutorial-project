@@ -19,12 +19,12 @@
         (let ((user  (list :username "NMunro"))
               (posts (list (list :author (list :username "Bob")  :content "Experimenting with Dylan" :created-at "2025-01-24 @ 13:34")
                            (list :author (list :username "Jane") :content "Wrote in my diary today"  :created-at "2025-01-24 @ 13:23"))))
-          (djula:render-template* "index.html" nil :title "Home" :user user :posts posts))))
+          (djula:render-template* "main/index.html" nil :title "Home" :user user :posts posts))))
 
 (setf (ningle:route *app* "/people")
       (lambda (params)
         (let ((users (mito:retrieve-dao 'ningle-tutorial-project/models:user)))
-          (djula:render-template* "people.html" nil :title "People" :users users))))
+          (djula:render-template* "main/people.html" nil :title "People" :users users))))
 
 (setf (ningle:route *app* "/people/:person")
       (lambda (params)
@@ -33,13 +33,13 @@
                               'ningle-tutorial-project/models:user
                               (where (:or (:= :username person)
                                           (:= :email person)))))))
-          (djula:render-template* "person.html" nil :title "Person" :user user))))
+          (djula:render-template* "main/person.html" nil :title "Person" :user user))))
 
 (setf (ningle:route *app* "/register" :method '(:GET :POST))
     (lambda (params)
         (let ((form (cl-forms:find-form 'register)))
           (if (string= "GET" (lack.request:request-method ningle:*request*))
-            (djula:render-template* "register.html" nil :title "Register" :form form)
+            (djula:render-template* "main/register.html" nil :title "Register" :form form)
             (handler-case
                 (progn
                     (cl-forms:handle-request form) ; Can throw an error if CSRF fails
