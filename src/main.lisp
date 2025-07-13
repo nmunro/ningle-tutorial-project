@@ -1,12 +1,5 @@
 (defpackage ningle-tutorial-project
-  (:use :cl :sxql)
-  (:import-from
-   :ningle-tutorial-project/forms
-   #:email
-   #:username
-   #:password
-   #:password-verify
-   #:register)
+  (:use :cl)
   (:export #:start
            #:stop))
 
@@ -23,54 +16,17 @@
 
 (setf (ningle:route *app* "/people")
       (lambda (params)
-        (let ((users (mito:retrieve-dao 'ningle-tutorial-project/models:user)))
+        (let ((users (mito:retrieve-dao 'ningle-auth/models:user)))
           (djula:render-template* "main/people.html" nil :title "People" :users users))))
 
 (setf (ningle:route *app* "/people/:person")
       (lambda (params)
         (let* ((person (ingle:get-param :person params))
                (user (first (mito:select-dao
-                              'ningle-tutorial-project/models:user
+                              'ningle-auth/models:user
                               (where (:or (:= :username person)
                                           (:= :email person)))))))
           (djula:render-template* "main/person.html" nil :title "Person" :user user))))
-
-(setf (ningle:route *app* "/register" :method '(:GET :POST))
-    (lambda (params)
-        (let ((form (cl-forms:find-form 'register)))
-          (if (string= "GET" (lack.request:request-method ningle:*request*))
-            (djula:render-template* "main/register.html" nil :title "Register" :form form)
-            (handler-case
-                (progn
-                    (cl-forms:handle-request form) ; Can throw an error if CSRF fails
-                    (multiple-value-bind (valid errors)
-                        (cl-forms:validate-form form)
-
-                      (when errors
-                        (format t "Errors: ~A~%" errors))
-
-                      (when valid
-                        (cl-forms:with-form-field-values (email username password password-verify) form
-                          (when (mito:select-dao 'ningle-tutorial-project/models:user
-                                 (where (:or (:= :username username)
-                                             (:= :email email))))
-                            (error "Either username or email is already registered"))
-
-                          (when (string/= password password-verify)
-                            (error "Passwords do not match"))
-
-                          (mito:create-dao 'ningle-tutorial-project/models:user
-                                           :email email
-                                           :username username
-                                           :password password)
-                          (ingle:redirect "/people")))))
-
-                (error (err)
-                    (djula:render-template* "error.html" nil :title "Error" :error err))
-
-                (simple-error (csrf-error)
-                    (setf (lack.response:response-status ningle:*response*) 403)
-                    (djula:render-template* "error.html" nil :title "Error" :error csrf-error)))))))
 
 (defmethod ningle:not-found ((app ningle:<app>))
     (declare (ignore app))

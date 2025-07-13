@@ -6,13 +6,15 @@
 (setf (config-env-var) "APP_ENV")
 
 (defconfig :common
-  `(:application-root ,(asdf:component-pathname (asdf:find-system :ningle-tutorial-project))))
+  `(:application-root ,(asdf:component-pathname (asdf:find-system :ningle-tutorial-project))
+    :installed-apps (:ningle-auth)
+    :login-redirect ,(uiop:getenv "LOGIN_REDIRECT")))
 
 (defconfig |sqlite|
   `(:debug T
     :middleware ((:session)
                  (:mito (:sqlite3 :database-name ,(uiop:getenv "SQLITE_DB_NAME")))
-                 (:mount "/auth" ,ningle-auth:*app*)
+                 ,(ningle-tutorial-project/middleware:auth-mount ningle-auth:*app* :mount-path "/auth")
                  (:static :root ,(asdf:system-relative-pathname :ningle-tutorial-project "src/static/") :path "/public/"))))
 
 (defconfig |mysql|
