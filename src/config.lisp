@@ -5,14 +5,20 @@
 (dotenv:load-env (asdf:system-relative-pathname :ningle-tutorial-project ".env"))
 (setf (config-env-var) "APP_ENV")
 
+(defparameter *auth-mount-path* "/auth")
+
 (defconfig :common
-  `(:application-root ,(asdf:component-pathname (asdf:find-system :ningle-tutorial-project))))
+  `(:application-root ,(asdf:component-pathname (asdf:find-system :ningle-tutorial-project))
+    :installed-apps (:ningle-auth)
+    :auth-mount-path ,*auth-mount-path*
+    :login-redirect "/"))
 
 (defconfig |sqlite|
   `(:debug T
     :middleware ((:session)
+                 ningle-tutorial-project/middleware:refresh-roles
                  (:mito (:sqlite3 :database-name ,(uiop:getenv "SQLITE_DB_NAME")))
-                 (:mount "/auth" ,ningle-auth:*app*)
+                 (:mount ,*auth-mount-path* ,ningle-auth:*app*)
                  (:static :root ,(asdf:system-relative-pathname :ningle-tutorial-project "src/static/") :path "/public/"))))
 
 (defconfig |mysql|
@@ -34,3 +40,4 @@
                          :host ,(uiop:getenv "POSTGRES_ADDRESS")
                          :port ,(parse-integer (uiop:getenv "POSTGRES_PORT"))))
                  (:static :root ,(asdf:system-relative-pathname :ningle-tutorial-project "src/static/") :path "/public/"))))
+

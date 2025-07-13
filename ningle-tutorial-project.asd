@@ -18,10 +18,10 @@
                :ningle-auth)
   :components ((:module "src"
                 :components
-                ((:file "config")
-                 (:file "models")
+                ((:file "contrib")
+                 (:file "middleware")
+                 (:file "config")
                  (:file "migrations")
-                 (:file "forms")
                  (:file "main"))))
   :in-order-to ((test-op (test-op "ningle-tutorial-project/tests"))))
 

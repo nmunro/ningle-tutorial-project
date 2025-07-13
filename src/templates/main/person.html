@@ -2,18 +2,17 @@
 
 {% block content %}
 <div class="container">
-    <!-- Posts Section -->
     <div class="row">
         <div class="col-12">
             <div class="row mb-4">
                 <div class="col">
-                    {% if not user %}
+                    {% if not person %}
                         <h1>No users</h1>
                     {% else %}
                         <div class="card">
                             <div class="card-body">
-                                <h5 class="card-title">{{ user.username }}</h5>
-                                <p class="card-text">{{ user.email }}</p>
+                                <h5 class="card-title">{{ person.username }}</h5>
+                                <p class="card-text">{{ person.email }}</p>
                                 <p class="text-muted small"></p>
                             </div>
                         </div>
