@@ -43,3 +43,34 @@ form#signup label {
     font-weight: bold;
     margin-bottom: 0.5rem;
 }
+
+form#login input {
+    display: block;  /* Ensure inputs take up the full width */
+    width: 100% !important; /* Override any conflicting styles */
+    max-width: 100%; /* Ensure no unnecessary constraints */
+    box-sizing: border-box;
+}
+
+form#login input[type="text"],
+form#login input[type="password"] {
+    @extend .form-control; /* Apply Bootstrap's .form-control */
+    display: block; /* Ensure they are block-level elements */
+    width: 100%; /* Make the input full width */
+    margin-bottom: 1rem; /* Spacing */
+}
+
+form#login input[type="submit"] {
+    @extend .btn;
+    @extend .btn-primary;
+    width: 100%;
+}
+
+form#login div {
+    @extend .mb-3;
+}
+
+form#login label {
+    @extend .form-label;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
