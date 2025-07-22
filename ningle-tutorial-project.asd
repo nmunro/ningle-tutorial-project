@@ -20,7 +20,9 @@
                 :components
                 ((:file "middleware")
                  (:file "config")
+                 (:file "db")
                  (:file "migrations")
+                 (:file "contrib")
                  (:file "main"))))
   :in-order-to ((test-op (test-op "ningle-tutorial-project/tests"))))
 

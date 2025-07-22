@@ -1,5 +1,5 @@
 (defpackage ningle-tutorial-project
-  (:use :cl)
+  (:use :cl :sxql)
   (:export #:start
            #:stop))
 

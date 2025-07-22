@@ -13,6 +13,7 @@
 (defconfig |sqlite|
   `(:debug T
     :middleware ((:session)
+                 ningle-auth/middleware:refresh-roles
                  (:mito (:sqlite3 :database-name ,(uiop:getenv "SQLITE_DB_NAME")))
                  ,(ningle-tutorial-project/middleware:auth-mount ningle-auth:*app* :mount-path "/auth")
                  (:static :root ,(asdf:system-relative-pathname :ningle-tutorial-project "src/static/") :path "/public/"))))
@@ -36,3 +37,4 @@
                          :host ,(uiop:getenv "POSTGRES_ADDRESS")
                          :port ,(parse-integer (uiop:getenv "POSTGRES_PORT"))))
                  (:static :root ,(asdf:system-relative-pathname :ningle-tutorial-project "src/static/") :path "/public/"))))
+
