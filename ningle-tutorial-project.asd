@@ -18,9 +18,9 @@
                :ningle-auth)
   :components ((:module "src"
                 :components
-                ((:file "middleware")
+                ((:file "db")
+                 (:file "middleware")
                  (:file "config")
-                 (:file "db")
                  (:file "migrations")
                  (:file "contrib")
                  (:file "main"))))
