@@ -9,10 +9,18 @@
 
 (setf (ningle:route *app* "/")
       (lambda (params)
-        (let ((user  (list :username "NMunro"))
+        (let ((user  (gethash :user ningle:*session*))
               (posts (list (list :author (list :username "Bob")  :content "Experimenting with Dylan" :created-at "2025-01-24 @ 13:34")
                            (list :author (list :username "Jane") :content "Wrote in my diary today"  :created-at "2025-01-24 @ 13:23"))))
           (djula:render-template* "main/index.html" nil :title "Home" :user user :posts posts))))
+
+(setf (ningle:route *app* "/profile")
+      (lambda (params)
+        (if (gethash :user ningle:*session*)
+            (djula:render-template* "main/profile.html" nil :title "Profile" :user (gethash :user ningle:*session*))
+            (progn
+                (setf (lack.response:response-status ningle:*response*) 403)
+                (djula:render-template* "error.html" nil :title "Error" :error "Unauthorized")))))
 
 (setf (ningle:route *app* "/people")
       (lambda (params)
@@ -26,7 +34,7 @@
                               'ningle-auth/models:user
                               (where (:or (:= :username person)
                                           (:= :email person)))))))
-          (djula:render-template* "main/person.html" nil :title "Person" :user user))))
+          (djula:render-template* "main/person.html" nil :title "Person" :user (gethash :user ningle:*session*)))))
 
 (defmethod ningle:not-found ((app ningle:<app>))
     (declare (ignore app))

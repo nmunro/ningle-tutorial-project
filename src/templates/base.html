@@ -32,9 +32,13 @@
                     </ul>
 
                     <div class="d-flex ms-auto">
-                        <a href="/auth/register" class="btn btn-primary">Register</a>
-                        &nbsp;|&nbsp;
-                        <a href="/auth/login" class="btn btn-success">Login</a>
+                        {% if user %}
+                            <a href="/profile" class="btn btn-primary">Profile</a>
+                        {% else %}
+                            <a href="/auth/register" class="btn btn-primary">Register</a>
+                            &nbsp;|&nbsp;
+                            <a href="/auth/login" class="btn btn-success">Login</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
