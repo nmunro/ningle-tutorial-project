@@ -16,11 +16,12 @@
 
 (setf (ningle:route *app* "/profile")
       (lambda (params)
-        (if (gethash :user ningle:*session*)
-            (djula:render-template* "main/profile.html" nil :title "Profile" :user (gethash :user ningle:*session*))
-            (progn
-                (setf (lack.response:response-status ningle:*response*) 403)
-                (djula:render-template* "error.html" nil :title "Error" :error "Unauthorized")))))
+        (let ((user (gethash :user ningle:*session*)))
+            (if user
+                (djula:render-template* "main/profile.html" nil :title "Profile" :user user)
+                (progn
+                    (setf (lack.response:response-status ningle:*response*) 403)
+                    (djula:render-template* "error.html" nil :title "Error" :error "Unauthorized"))))))
 
 (setf (ningle:route *app* "/people")
       (lambda (params)
