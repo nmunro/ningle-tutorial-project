@@ -11,15 +11,55 @@
   `(:application-root ,(asdf:component-pathname (asdf:find-system :ningle-tutorial-project))
     :installed-apps (:ningle-auth)
     :auth-mount-path ,*auth-mount-path*
-    :login-redirect "/"))
+    :login-redirect "/"
+    :project-name "NTP"
+    :token-expiration 3600
+    :email-admins ("nmunro@duck.com")))
 
-(defconfig |sqlite|
-  `(:debug T
-    :middleware ((:session)
+(defconfig |database-settings|
+  `((:mito (:sqlite3 :database-name ,(uiop:getenv "SQLITE_DB_NAME")))))
+
+(defconfig |middleware|
+  `(:middleware ((:session)
                  ningle-tutorial-project/middleware:refresh-roles
-                 (:mito (:sqlite3 :database-name ,(uiop:getenv "SQLITE_DB_NAME")))
+                 ,@|database-settings|
                  (:mount ,*auth-mount-path* ,ningle-auth:*app*)
                  (:static :root ,(asdf:system-relative-pathname :ningle-tutorial-project "src/static/") :path "/public/"))))
+
+(defconfig |dummy-email|
+`(:debug T
+    ,@|middleware|
+    :email-backend :dummy
+    :email-default-from ,(uiop:getenv "EMAIL_DEFAULT_FROM")))
+
+(defconfig |gmail-smtp|
+  `(:debug T
+    ,@|middleware|
+    :email-backend :smtp
+    :email-smtp-host ,(uiop:getenv "SMTP_GMAIL_HOST")
+    :email-default-from ,(uiop:getenv "SMTP_GMAIL_ACCOUNT_NAME")
+    :email-reply-to ,(uiop:getenv "SMTP_GMAIL_ACCOUNT_NAME")
+    :email-port 587
+    :email-auth (,(uiop:getenv "SMTP_GMAIL_ACCOUNT_NAME") ,(uiop:getenv "SMTP_GMAIL_PASSWORD"))
+    :email-ssl :starttls))
+
+(defconfig |ethereal-smtp|
+  `(:debug T
+    ,@|middleware|
+    :email-backend :smtp
+    :email-smtp-host ,(uiop:getenv "SMTP_ETHEREAL_HOST")
+    :email-default-from ,(uiop:getenv "SMTP_ETHEREAL_ACCOUNT_NAME")
+    :email-reply-to ,(uiop:getenv "SMTP_ETHEREAL_ACCOUNT_NAME")
+    :email-port 587
+    :email-auth (,(uiop:getenv "SMTP_ETHEREAL_ACCOUNT_NAME") ,(uiop:getenv "SMTP_ETHEREAL_PASSWORD"))
+    :email-ssl :starttls))
+
+(defconfig |sendgrid|
+  `(:debug T
+    ,@|middleware|
+    :email-backend :sendgrid
+    :email-reply-to ,(uiop:getenv "EMAIL_DEFAULT_FROM")
+    :sendgrid-api-key ,(uiop:getenv "SENDGRID_API_KEY")))
 
 (defconfig |mysql|
   `(:middleware ((:session)
