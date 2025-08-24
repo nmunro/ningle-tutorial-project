@@ -11,15 +11,61 @@
   `(:application-root ,(asdf:component-pathname (asdf:find-system :ningle-tutorial-project))
     :installed-apps (:ningle-auth)
     :auth-mount-path ,*auth-mount-path*
-    :login-redirect "/"))
+    :login-redirect "/"
+    :project-name "NTP"
+    :token-expiration 3600
+    :email-admins ("nmunro@duck.com")))
 
-(defconfig |sqlite|
+(defconfig |sqlite-with-dummy-email|
+`(:debug T
+    :middleware ((:session)
+                 ningle-tutorial-project/middleware:refresh-roles
+                 (:mito (:sqlite3 :database-name ,(uiop:getenv "SQLITE_DB_NAME")))
+                 (:mount ,*auth-mount-path* ,ningle-auth:*app*)
+                 (:static :root ,(asdf:system-relative-pathname :ningle-tutorial-project "src/static/") :path "/public/"))
+    :email-backend :dummy
+    :email-default-from "nmunro@duck.com"))
+
+(defconfig |sqlite-with-gmail-smtp|
   `(:debug T
     :middleware ((:session)
                  ningle-tutorial-project/middleware:refresh-roles
                  (:mito (:sqlite3 :database-name ,(uiop:getenv "SQLITE_DB_NAME")))
                  (:mount ,*auth-mount-path* ,ningle-auth:*app*)
-                 (:static :root ,(asdf:system-relative-pathname :ningle-tutorial-project "src/static/") :path "/public/"))))
+                 (:static :root ,(asdf:system-relative-pathname :ningle-tutorial-project "src/static/") :path "/public/"))
+    :email-backend :smtp
+    :email-smtp-host ,(uiop:getenv "SMTP_GMAIL_HOST")
+    :email-default-from ,(uiop:getenv "SMTP_GMAIL_ACCOUNT_NAME")
+    :email-reply-to ,(uiop:getenv "SMTP_GMAIL_ACCOUNT_NAME")
+    :email-port 587
+    :email-auth (,(uiop:getenv "SMTP_GMAIL_ACCOUNT_NAME") ,(uiop:getenv "SMTP_GMAIL_PASSWORD"))
+    :email-ssl :starttls))
+
+(defconfig |sqlite-with-ethereal-smtp|
+  `(:debug T
+    :middleware ((:session)
+                 ningle-tutorial-project/middleware:refresh-roles
+                 (:mito (:sqlite3 :database-name ,(uiop:getenv "SQLITE_DB_NAME")))
+                 (:mount ,*auth-mount-path* ,ningle-auth:*app*)
+                 (:static :root ,(asdf:system-relative-pathname :ningle-tutorial-project "src/static/") :path "/public/"))
+    :email-backend :smtp
+    :email-smtp-host ,(uiop:getenv "SMTP_ETHEREAL_HOST")
+    :email-default-from ,(uiop:getenv "SMTP_ETHEREAL_ACCOUNT_NAME")
+    :email-reply-to ,(uiop:getenv "SMTP_ETHEREAL_ACCOUNT_NAME")
+    :email-port 587
+    :email-auth (,(uiop:getenv "SMTP_ETHEREAL_ACCOUNT_NAME") ,(uiop:getenv "SMTP_ETHEREAL_PASSWORD"))
+    :email-ssl :starttls))
+
+(defconfig |sqlite-with-sendgrid|
+  `(:debug T
+    :middleware ((:session)
+                 ningle-tutorial-project/middleware:refresh-roles
+                 (:mito (:sqlite3 :database-name ,(uiop:getenv "SQLITE_DB_NAME")))
+                 (:mount ,*auth-mount-path* ,ningle-auth:*app*)
+                 (:static :root ,(asdf:system-relative-pathname :ningle-tutorial-project "src/static/") :path "/public/"))
+    :email-backend :sendgrid
+    :email-reply-to "nmunro@duck.com"
+    :sendgrid-api-key ,(uiop:getenv "SENDGRID_API_KEY")))
 
 (defconfig |mysql|
   `(:middleware ((:session)
