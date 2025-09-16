@@ -12,6 +12,7 @@
                :envy
                :envy-ningle
                :ingle
+               :com.inuoe.jzon
                :mito
                :mito-auth
                :ningle
@@ -21,6 +22,8 @@
                 ((:file "contrib")
                  (:file "middleware")
                  (:file "config")
+                 (:file "models")
+                 (:file "forms")
                  (:file "migrations")
                  (:file "main"))))
   :in-order-to ((test-op (test-op "ningle-tutorial-project/tests"))))

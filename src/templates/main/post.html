@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2>{{ post.user.username }}</h2>
+            <p>{{ post.content }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
