@@ -69,8 +69,101 @@ form#login div {
     @extend .mb-3;
 }
 
-form#login label {
-    @extend .form-label;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
+form#post div {
+    @extend .mb-3;
+}
+
+form#post {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem;
+    width: 100% !important;
+}
+
+/* Make the input wrapper expand */
+form#post > div:first-of-type {
+    flex: 1 1 auto !important;
+    min-width: 0;  /* allow shrinking */
+}
+
+form#post label {
+    display: none !important;
+}
+
+form#post input[type="text"] {
+    flex: 1 1 0% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    /* Bootstrap .form-control styles */
+    display: block;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+form#post input[type="submit"] {
+    flex: 0 0 auto !important;
+    /* Bootstrap .btn + .btn-primary styles */
+    display: inline-block;
+    font-weight: 400;
+    color: #fff;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    background-color: #0d6efd;
+    border: 1px solid #0d6efd;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.375rem;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out,
+                border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    cursor: pointer;
+}
+form#post input[type="submit"]:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+/* Post container styling */
+.post {
+    display: block;                /* Makes the whole card clickable */
+    text-decoration: none;         /* Remove underline from link */
+    color: inherit;                /* Use normal text color */
+    background: #fff;              /* White card background */
+    border: 1px solid #dee2e6;     /* Subtle border */
+    border-radius: 0.5rem;         /* Rounded corners */
+    padding: 1rem;                 /* Inner spacing */
+    margin-bottom: 1rem;           /* Space between posts */
+    transition: box-shadow 0.2s ease, transform 0.1s ease;
+    cursor: pointer;
+}
+
+/* Hover/active effect */
+.post:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+    text-decoration: none;   /* still no underline on hover */
+}
+
+/* Post title/content */
+.post-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+    color: #0d6efd;  /* bootstrap primary link color */
+}
+
+/* Post meta info */
+.post-meta {
+    font-size: 0.875rem;
+    color: #6c757d;  /* muted gray */
+    margin-top: 0.5rem;
 }
