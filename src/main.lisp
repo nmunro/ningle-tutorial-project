@@ -1,5 +1,5 @@
 (defpackage ningle-tutorial-project
-  (:use :cl :sxql :ningle-tutorial-project/forms)
+  (:use :cl :ningle-tutorial-project/controllers)
   (:export #:start
            #:stop))
 
@@ -13,84 +13,15 @@
         (and (cu-sith:logged-in-p) value)))
 
 ;; routes
-(setf (ningle:route *app* "/" :logged-in-p t)
-      (lambda (params)
-        (let* ((user (gethash :user ningle:*session*))
-               (form (cl-forms:find-form 'post))
-               (posts (ningle-tutorial-project/models:logged-in-posts user)))
-          (djula:render-template* "main/index.html" nil :title "Home" :user user :posts posts :form form))))
-
-(setf (ningle:route *app* "/")
-      (lambda (params)
-        (let ((posts (ningle-tutorial-project/models:not-logged-in-posts)))
-          (djula:render-template* "main/index.html" nil :title "Home" :user (gethash :user ningle:*session*) :posts posts))))
-
-(setf (ningle:route *app* "/post/:id/likes" :method :POST :logged-in-p t)
-     (lambda (params)
-       (let* ((user (gethash :user ningle:*session*))
-              (post (mito:find-dao 'ningle-tutorial-project/models:post :id (parse-integer (ingle:get-param :id params))))
-              (res (make-hash-table :test 'equal)))
-           (setf (gethash :post res) (ingle:get-param :id params))
-           (setf (gethash :likes res) (ningle-tutorial-project/models:likes post))
-           (setf (gethash :liked res) (ningle-tutorial-project/models:toggle-like user post))
-           (com.inuoe.jzon:stringify res))))
-
-(setf (ningle:route *app* "/post/:id")
-      (lambda (params)
-        (handler-case
-          (let ((post (mito:find-dao 'ningle-tutorial-project/models:post :id (parse-integer (ingle:get-param :id params)))))
-              (djula:render-template* "main/post.html" nil :title "Post" :post post))
-
-          (parse-error (err)
-                (setf (lack.response:response-status ningle:*response*) 404)
-                (djula:render-template* "error.html" nil :title "Error" :error err)))))
-
-(setf (ningle:route *app* "/post" :method :POST :logged-in-p t)
-      (lambda (params)
-        (let ((user (gethash :user ningle:*session*))
-              (form (cl-forms:find-form 'post)))
-          (handler-case
-            (progn
-              (cl-forms:handle-request form) ; Can throw an error if CSRF fails
-
-              (multiple-value-bind (valid errors)
-                  (cl-forms:validate-form form)
-
-                (when errors
-                  (format t "Errors: ~A~%" errors))
-
-                (when valid
-                  (cl-forms:with-form-field-values (content) form
-                    (mito:create-dao 'ningle-tutorial-project/models:post :content content :user user)
-                    (ingle:redirect "/")))))
-
-            (simple-error (err)
-              (setf (lack.response:response-status ningle:*response*) 403)
-              (djula:render-template* "error.html" nil :title "Error" :error err))))))
-
-(setf (ningle:route *app* "/profile" :logged-in-p t)
-      (lambda (params)
-        (let ((user (gethash :user ningle:*session*)))
-            (djula:render-template* "main/profile.html" nil :title "Profile" :user user))))
-
-(setf (ningle:route *app* "/profile")
-      (lambda (params)
-          (setf (lack.response:response-status ningle:*response*) 403)
-          (djula:render-template* "error.html" nil :title "Error" :error "Unauthorized")))
-
-(setf (ningle:route *app* "/people")
-      (lambda (params)
-        (let ((users (mito:retrieve-dao 'ningle-auth/models:user)))
-          (djula:render-template* "main/people.html" nil :title "People" :users users :user (cu-sith:logged-in-p)))))
-
-(setf (ningle:route *app* "/people/:person")
-      (lambda (params)
-        (let* ((username-or-email (ingle:get-param :person params))
-               (person (first (mito:select-dao
-                              'ningle-auth/models:user
-                              (where (:or (:= :username username-or-email)
-                                          (:= :email username-or-email)))))))
-          (djula:render-template* "main/person.html" nil :title "Person" :person person :user (cu-sith:logged-in-p)))))
+(setf (ningle:route *app* "/" :logged-in-p t) #'logged-in-index)
+(setf (ningle:route *app* "/") #'index)
+(setf (ningle:route *app* "/post/:id/likes" :method :POST :logged-in-p t) #'post-likes)
+(setf (ningle:route *app* "/post/:id") #'single-post)
+(setf (ningle:route *app* "/post" :method :POST :logged-in-p t) #'post-content)
+(setf (ningle:route *app* "/profile" :logged-in-p t) #'logged-in-profile)
+(setf (ningle:route *app* "/profile") #'unauthorized-profile)
+(setf (ningle:route *app* "/people") #'people)
+(setf (ningle:route *app* "/people/:person") #'person)
 
 (defmethod ningle:not-found ((app ningle:<app>))
     (declare (ignore app))

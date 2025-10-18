@@ -25,6 +25,7 @@
                  (:file "models")
                  (:file "forms")
                  (:file "migrations")
+                 (:file "controllers")
                  (:file "main"))))
   :in-order-to ((test-op (test-op "ningle-tutorial-project/tests"))))
 

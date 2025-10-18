@@ -53,9 +53,11 @@
         (sxql:yield
             (sxql:select
                 (:post.*
-                (:as (:count :likes.id) :like_count)
-                (:as (:count :user_likes.id) :liked_by_user))
+                  (:as :user.username :username)
+                  (:as (:count :likes.id) :like_count)
+                  (:as (:count :user_likes.id) :liked_by_user))
                 (sxql:from :post)
+                (sxql:left-join :user :on (:= :post.user_id :user.id))
                 (sxql:left-join :likes :on (:= :post.id :likes.post_id))
                 (sxql:left-join (:as :likes :user_likes)
                                 :on (:and (:= :post.id :user_likes.post_id)
@@ -69,8 +71,11 @@
     (mito:retrieve-by-sql
         (sxql:yield
         (sxql:select
-            (:post.* (:as (:count :likes.id) :like_count))
+            (:post.*
+              (:as :user.username :username)
+              (:as (:count :likes.id) :like_count))
             (sxql:from :post)
+            (sxql:left-join :user :on (:= :post.user_id :user.id))
             (sxql:left-join :likes :on (:= :post.id :likes.post_id))
             (sxql:group-by :post.id)
             (sxql:order-by (:desc :post.created_at))
