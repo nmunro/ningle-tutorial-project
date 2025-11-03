@@ -26,7 +26,7 @@
                         class="btn btn-sm btn-outline-primary like-button"
                         data-post-id="{{ post.id }}"
                         data-logged-in="{% if user.username != "" %}true{% else %}false{% endif %}"
-                        data-liked="{% if post.liked-by-user == 1 %}true{% else %}false{% endif %}"
+                        data-liked="{% if post.liked-by-user == 1 %}1{% else %}0{% endif %}"
                         aria-label="Like post {{ post.id }}">
                     {% if post.liked-by-user == 1 %}
                       <i class="bi bi-hand-thumbs-up-fill text-primary" aria-hidden="true"></i>
@@ -66,7 +66,7 @@ document.querySelectorAll(".like-button").forEach(btn => {
     const postId = btn.dataset.postId;
     const countSpan = btn.querySelector(".like-count");
     const icon = btn.querySelector("i");
-    const liked = btn.dataset.liked === "true";
+    const liked = Number(btn.dataset.liked) === 1;
     const previous = parseInt(countSpan.textContent, 10) || 0;
     const url = `/post/${postId}/likes`;
 
@@ -96,7 +96,7 @@ document.querySelectorAll(".like-button").forEach(btn => {
       if (!resp.ok) {
         // Revert optimistic changes on error
         countSpan.textContent = previous;
-        btn.dataset.liked = liked ? "true" : "false";
+        btn.dataset.liked = liked ? 1 : 0;
         if (liked) {
           icon.className = "bi bi-hand-thumbs-up-fill text-primary";
         } else {
@@ -123,7 +123,7 @@ document.querySelectorAll(".like-button").forEach(btn => {
       console.error("Like failed:", err);
       // Revert optimistic changes on error
       countSpan.textContent = previous;
-      btn.dataset.liked = liked ? "true" : "false";
+      btn.dataset.liked = liked ? 1 : 0;
       if (liked) {
         icon.className = "bi bi-hand-thumbs-up-fill text-primary";
       } else {

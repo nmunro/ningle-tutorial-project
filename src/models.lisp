@@ -4,17 +4,19 @@
   (:export #:post
            #:id
            #:content
+           #:comments
            #:likes
            #:user
            #:liked-post-p
-           #:logged-in-posts
-           #:not-logged-in-posts
+           #:posts
+           #:parent
            #:toggle-like))
 
 (in-package ningle-tutorial-project/models)
 
 (deftable post ()
   ((user    :col-type ningle-auth/models:user :initarg :user    :accessor user)
+   (parent  :col-type (or :post :null)        :initarg :parent  :reader parent :initform nil)
    (content :col-type (:varchar 140)          :initarg :content :accessor content)))
 
 (deftable likes ()
@@ -27,6 +29,45 @@
 
 (defmethod likes ((post post))
   (mito:count-dao 'likes :post post))
+
+(defgeneric comments (post user)
+  (:documentation "Gets the comments for a logged in user"))
+
+(defmethod comments ((post post) (user user))
+    (mito:retrieve-by-sql
+        (sxql:yield
+            (sxql:select
+                (:post.*
+                    (:as :user.username :username)
+                    (:as (:count :likes.id) :like_count)
+                    (:as (:count :user_likes.id) :liked_by_user))
+                (sxql:from :post)
+                (sxql:where (:= :parent :?))
+                (sxql:left-join :user :on (:= :post.user_id :user.id))
+                (sxql:left-join :likes :on (:= :post.id :likes.post_id))
+                (sxql:left-join (:as :likes :user_likes)
+                                :on (:and (:= :post.id :user_likes.post_id)
+                                          (:= :user_likes.user_id :?)))
+                (sxql:group-by :post.id)
+                (sxql:order-by (:desc :post.created_at))
+                (sxql:limit 50)))
+            :binds (list (mito:object-id post) (mito:object-id user))))
+
+(defmethod comments ((post post) (user null))
+    (mito:retrieve-by-sql
+        (sxql:yield
+        (sxql:select
+            (:post.*
+              (:as :user.username :username)
+              (:as (:count :likes.id) :like_count))
+            (sxql:from :post)
+            (sxql:where (:= :parent :?))
+            (sxql:left-join :user :on (:= :post.user_id :user.id))
+            (sxql:left-join :likes :on (:= :post.id :likes.post_id))
+            (sxql:group-by :post.id)
+            (sxql:order-by (:desc :post.created_at))
+            (sxql:limit 50)))
+        :binds (list (mito:object-id post))))
 
 (defgeneric toggle-like (user post)
   (:documentation "Toggles the like of a user to a given post"))
@@ -44,11 +85,10 @@
 (defmethod liked-post-p ((ningle-auth/models:user user) (post post))
   (mito:find-dao 'likes :user user :post post))
 
-(defgeneric logged-in-posts (user)
-  (:documentation "Gets the posts for a logged in user"))
+(defgeneric posts (user)
+  (:documentation "Gets the posts"))
 
-(defmethod logged-in-posts ((user user))
-  (let ((uid (slot-value user 'mito.dao.mixin::id)))
+(defmethod posts ((user user))
     (mito:retrieve-by-sql
         (sxql:yield
             (sxql:select
@@ -65,9 +105,9 @@
                 (sxql:group-by :post.id)
                 (sxql:order-by (:desc :post.created_at))
                 (sxql:limit 50)))
-            :binds (list uid))))
+            :binds (list (mito:object-id user))))
 
-(defun not-logged-in-posts ()
+(defmethod posts ((user null))
     (mito:retrieve-by-sql
         (sxql:yield
         (sxql:select

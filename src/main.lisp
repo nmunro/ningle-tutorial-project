@@ -13,11 +13,11 @@
         (and (cu-sith:logged-in-p) value)))
 
 ;; routes
-(setf (ningle:route *app* "/" :logged-in-p t) #'logged-in-index)
 (setf (ningle:route *app* "/") #'index)
 (setf (ningle:route *app* "/post/:id/likes" :method :POST :logged-in-p t) #'post-likes)
 (setf (ningle:route *app* "/post/:id") #'single-post)
 (setf (ningle:route *app* "/post" :method :POST :logged-in-p t) #'post-content)
+(setf (ningle:route *app* "/post/comment" :method :POST :logged-in-p t) #'post-comment)
 (setf (ningle:route *app* "/profile" :logged-in-p t) #'logged-in-profile)
 (setf (ningle:route *app* "/profile") #'unauthorized-profile)
 (setf (ningle:route *app* "/people") #'people)

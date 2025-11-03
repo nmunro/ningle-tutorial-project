@@ -4,9 +4,158 @@
 <div class="container">
     <div class="row">
         <div class="col-12">
-            <h2>{{ post.username }}</h2>
-            <p>{{ post.content }}</p>
+            <div class="card post mb-3" data-href="/post/{{ post.id }}">
+                <div class="card-body">
+                <h5 class="card-title mb-2">{{ post.content }}</h5>
+                <p class="card-subtitle text-muted mb-0">@{{ post.user.username }}</p>
+                </div>
+
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                <button type="button"
+                        class="btn btn-sm btn-outline-primary like-button"
+                        data-post-id="{{ post.id }}"
+                        data-logged-in="{% if user.username != "" %}true{% else %}false{% endif %}"
+                        data-liked="{% if post.liked-by-user == 1 %}1{% else %}0{% endif %}"
+                        aria-label="Like post {{ post.id }}">
+                    {% if post.liked-by-user == 1 %}
+                      <i class="bi bi-hand-thumbs-up-fill text-primary" aria-hidden="true"></i>
+                    {% else %}
+                      <i class="bi bi-hand-thumbs-up text-muted" aria-hidden="true"></i>
+                    {% endif %}
+                    <span class="ms-1 like-count">{{ likes }}</span>
+                </button>
+
+                <small class="text-muted">Posted on: {{ post.created-at }}</small>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Post form -->
+    {% if user %}
+        <div class="row mb-4">
+            <div class="col">
+                {% if form %}
+                    {% form form %}
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if comments %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Comments</h2>
+        </div>
+    </div>
+    {% endif %}
+
+    {% for comment in comments %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card post mb-3" data-href="/post/{{ comment.id }}">
+                    <div class="card-body">
+                        <h5 class="card-title mb-2">{{ comment.content }}</h5>
+                        <p class="card-subtitle text-muted mb-0">@{{ comment.username }}</p>
+                    </div>
+
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-primary like-button"
+                                data-post-id="{{ comment.id }}"
+                                data-logged-in="{% if user.username != "" %}true{% else %}false{% endif %}"
+                                data-liked="{% if comment.liked-by-user == 1 %}1{% else %}0{% endif %}"
+                                aria-label="Like post {{ comment.id }}">
+                            {% if comment.liked-by-user == 1 %}
+                                <i class="bi bi-hand-thumbs-up-fill text-primary" aria-hidden="true"></i>
+                            {% else %}
+                                <i class="bi bi-hand-thumbs-up text-muted" aria-hidden="true"></i>
+                            {% endif %}
+                            <span class="ms-1 like-count">{{ comment.like-count }}</span>
+                        </button>
+                        <small class="text-muted">Posted on: {{ comment.created-at }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
 </div>
+{% endblock %}
+
+{% block js %}
+document.querySelectorAll(".like-button").forEach(btn => {
+  btn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    // Check login
+    if (btn.dataset.loggedIn !== "true") {
+      alert("You must be logged in to like posts.");
+      return;
+    }
+
+    const postId = btn.dataset.postId;
+    const countSpan = btn.querySelector(".like-count");
+    const icon = btn.querySelector("i");
+    const liked = Number(btn.dataset.liked) === 1;
+    const previous = parseInt(countSpan.textContent, 10) || 0;
+    const url = `/post/${postId}/likes`;
+
+    // Optimistic UI toggle
+    countSpan.textContent = liked ? previous - 1 : previous + 1;
+    btn.dataset.liked = liked ? 0 : 1;
+
+    // Toggle icon classes optimistically
+    if (liked) {
+      // Currently liked, so unlike it
+      icon.className = "bi bi-hand-thumbs-up text-muted";
+    } else {
+      // Currently not liked, so like it
+      icon.className = "bi bi-hand-thumbs-up-fill text-primary";
+    }
+
+    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+    const headers = { "Content-Type": "application/json" };
+    if (csrfTokenMeta) headers["X-CSRF-Token"] = csrfTokenMeta.getAttribute("content");
+
+    fetch(url, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({ toggle: true })
+    })
+    .then(resp => {
+      if (!resp.ok) {
+        // Revert optimistic changes on error
+        countSpan.textContent = previous;
+        btn.dataset.liked = liked ? 1 : 0;
+        icon.className = liked ? "bi bi-hand-thumbs-up-fill text-primary" : "bi bi-hand-thumbs-up text-muted";
+        throw new Error("Network response was not ok");
+      }
+      return resp.json();
+    })
+    .then(data => {
+      if (data && typeof data.likes !== "undefined") {
+        countSpan.textContent = data.likes;
+        btn.dataset.liked = data.liked ? "true" : "false";
+        icon.className = data.liked ? "bi bi-hand-thumbs-up-fill text-primary" : "bi bi-hand-thumbs-up text-muted";
+      }
+    })
+    .catch(err => {
+      console.error("Like failed:", err);
+      // Revert optimistic changes on error
+      countSpan.textContent = previous;
+      btn.dataset.liked = liked ? 1 : 0;
+      icon.className = liked ? "bi bi-hand-thumbs-up-fill text-primary" : "bi bi-hand-thumbs-up text-muted";
+    });
+  });
+});
+
+document.querySelectorAll(".card.post").forEach(card => {
+  card.addEventListener("click", function () {
+    const href = card.dataset.href;
+    if (href) {
+      window.location.href = href;
+    }
+  });
+});
 {% endblock %}
