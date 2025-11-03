@@ -4,17 +4,20 @@
   (:export #:post
            #:id
            #:content
+           #:comments
            #:likes
            #:user
            #:liked-post-p
            #:logged-in-posts
            #:not-logged-in-posts
+           #:parent
            #:toggle-like))
 
 (in-package ningle-tutorial-project/models)
 
 (deftable post ()
   ((user    :col-type ningle-auth/models:user :initarg :user    :accessor user)
+   (parent  :col-type :post                   :initarg :parent  :reader parent :initform 0)
    (content :col-type (:varchar 140)          :initarg :content :accessor content)))
 
 (deftable likes ()
@@ -27,6 +30,15 @@
 
 (defmethod likes ((post post))
   (mito:count-dao 'likes :post post))
+
+(defgeneric comments (post)
+  (:documentation "Returns all posts that have share a direct parent"))
+
+(defmethod comments ((post post))
+  (mito:select-dao 'post
+    (where (:= :parent (slot-value post 'mito.dao.mixin::id)))
+    (order-by (:desc :created_at))
+    (limit 50)))
 
 (defgeneric toggle-like (user post)
   (:documentation "Toggles the like of a user to a given post"))

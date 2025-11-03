@@ -1,10 +1,16 @@
 (defpackage ningle-tutorial-project/controllers
-  (:use :cl :sxql :ningle-tutorial-project/forms)
+  (:use :cl :sxql)
+  (:import-from :ningle-tutorial-project/forms
+                #:post
+                #:content
+                #:parent
+                #:comment)
   (:export #:logged-in-index
            #:index
            #:post-likes
            #:single-post
            #:post-content
+           #:post-comment
            #:logged-in-profile
            #:unauthorized-profile
            #:people
@@ -26,19 +32,43 @@
 
 
 (defun post-likes (params)
-    (let* ((user (gethash :user ningle:*session*))
-           (post (mito:find-dao 'ningle-tutorial-project/models:post :id (parse-integer (ingle:get-param :id params))))
-           (res (make-hash-table :test 'equal)))
-        (setf (gethash :post res) (ingle:get-param :id params))
-        (setf (gethash :likes res) (ningle-tutorial-project/models:likes post))
-        (setf (gethash :liked res) (ningle-tutorial-project/models:toggle-like user post))
-        (com.inuoe.jzon:stringify res)))
+  (let* ((user (gethash :user ningle:*session*))
+         (post (mito:find-dao 'ningle-tutorial-project/models:post :id (parse-integer (ingle:get-param :id params))))
+         (res (make-hash-table :test 'equal)))
+    ;; Bail out if post does not exist
+    (unless post
+      (setf (lack.response:response-status ningle:*response*) 404)
+      (setf (getf (lack.response:response-headers ningle:*response*) :content-type) "application/json")
+      (setf (gethash "ok" res) nil)
+      (setf (gethash "error" res) "post not found")
+      (setf (lack.response:response-status ningle:*response*) 404)
+      (return-from post-likes (com.inuoe.jzon.stringify res)))
 
+    (let ((liked (ningle-tutorial-project/models:toggle-like user post))
+          (likes (ningle-tutorial-project/models:likes post)))
+      (setf (gethash "post" res) (slot-value post 'mito.dao.mixin::id))
+      (setf (gethash "likes" res) likes)
+      (setf (gethash "liked" res) (if liked t nil))
+      (setf (getf (lack.response:response-headers ningle:*response*) :content-type) "application/json")
+      (setf (lack.response:response-status ningle:*response*) 201)
+      (com.inuoe.jzon:stringify res))))
 
 (defun single-post (params)
     (handler-case
-        (let ((post (mito:find-dao 'ningle-tutorial-project/models:post :id (parse-integer (ingle:get-param :id params)))))
-            (djula:render-template* "main/post.html" nil :title "Post" :post post))
+        (let* ((post-id (parse-integer (ingle:get-param :id params)))
+               (post (mito:find-dao 'ningle-tutorial-project/models:post :id post-id))
+               (comments (ningle-tutorial-project/models:comments post))
+               (likes (ningle-tutorial-project/models:likes post))
+               (form (cl-forms:find-form 'comment))
+               (user (gethash :user ningle:*session*)))
+          (cl-forms:set-field-value form 'ningle-tutorial-project/forms:parent post-id)
+          (djula:render-template* "main/post.html" nil
+                                  :title "Post"
+                                  :post post
+                                  :comments comments
+                                  :likes likes
+                                  :form form
+                                  :user user))
 
         (parse-error (err)
             (setf (lack.response:response-status ningle:*response*) 404)
@@ -60,7 +90,30 @@
 
                     (when valid
                         (cl-forms:with-form-field-values (content) form
-                            (mito:create-dao 'ningle-tutorial-project/models:post :content content :user user)
+                            (mito:create-dao 'ningle-tutorial-project/models:post :content content :user user :parent 0)
+                            (ingle:redirect "/")))))
+
+            (simple-error (err)
+                (setf (lack.response:response-status ningle:*response*) 403)
+                (djula:render-template* "error.html" nil :title "Error" :error err)))))
+
+
+(defun post-comment (params)
+    (let ((user (gethash :user ningle:*session*))
+          (form (cl-forms:find-form 'comment)))
+        (handler-case
+            (progn
+                (cl-forms:handle-request form) ; Can throw an error if CSRF fails
+
+                (multiple-value-bind (valid errors)
+                    (cl-forms:validate-form form)
+
+                    (when errors
+                        (format t "Errors: ~A~%" errors))
+
+                    (when valid
+                        (cl-forms:with-form-field-values (content parent) form
+                            (mito:create-dao 'ningle-tutorial-project/models:post :content content :user user :parent (parse-integer parent))
                             (ingle:redirect "/")))))
 
             (simple-error (err)
