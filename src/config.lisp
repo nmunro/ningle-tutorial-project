@@ -17,19 +17,19 @@
 (defconfig |mysql|
   `(:middleware ((:session)
                  (:mito (:mysql
-                         :database-name ,(uiop:native-namestring (uiop:parse-unix-namestring (uiop:getenv "MYSQL_DB_NAME")))
-                         :username ,(uiop:getenv "MYSQL_USER")
-                         :password ,(uiop:getenv "MYSQL_PASSWORD")
-                         :host ,(uiop:getenv "MYSQL_ADDRESS")
-                         :port ,(parse-integer (uiop:getenv "MYSQL_PORT"))))
+                         :database-name ,(uiop:native-namestring (uiop:parse-unix-namestring (or (uiop:getenv "MYSQL_DB_NAME") "")))
+                         :username ,(or (uiop:getenv "MYSQL_USER") "")
+                         :password ,(or (uiop:getenv "MYSQL_PASSWORD") "")
+                         :host ,(or (uiop:getenv "MYSQL_ADDRESS") "")
+                         :port (parse-integer ,(or (uiop:getenv "MYSQL_PORT") 0))))
                  (:static :root ,(asdf:system-relative-pathname :ningle-tutorial-project "src/static/") :path "/public/"))))
 
 (defconfig |postgresql|
   `(:middleware ((:session)
                  (:mito (:postgres
-                         :database-name ,(uiop:native-namestring (uiop:parse-unix-namestring (uiop:getenv "POSTGRES_DB_NAME")))
-                         :username ,(uiop:getenv "POSTGRES_USER")
-                         :password ,(uiop:getenv "POSTGRES_PASSWORD")
-                         :host ,(uiop:getenv "POSTGRES_ADDRESS")
-                         :port ,(parse-integer (uiop:getenv "POSTGRES_PORT"))))
+                         :database-name ,(uiop:native-namestring (uiop:parse-unix-namestring (or (uiop:getenv "POSTGRES_DB_NAME") "")))
+                         :username ,(or (uiop:getenv "POSTGRES_USER") "")
+                         :password ,(or (uiop:getenv "POSTGRES_PASSWORD") "")
+                         :host ,(or (uiop:getenv "POSTGRES_ADDRESS") "")
+                         :port (parse-integer ,(or (uiop:getenv "POSTGRES_PORT") 0))))
                  (:static :root ,(asdf:system-relative-pathname :ningle-tutorial-project "src/static/") :path "/public/"))))
