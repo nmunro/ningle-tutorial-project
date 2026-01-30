@@ -19,9 +19,34 @@
 
 
 (defun index (params)
-    (let* ((user (gethash :user ningle:*session*))
-           (posts (ningle-tutorial-project/models:posts user)))
-        (djula:render-template* "main/index.html" nil :title "Home" :user user :posts posts :form (if user (cl-forms:find-form 'post) nil))))
+    (let ((user (gethash :user ningle:*session*))
+          (page (or (parse-integer (or (ingle:get-param "page" params) "1") :junk-allowed t) 1))
+          (limit (or (parse-integer (or (ingle:get-param "limit" params) "50") :junk-allowed t) 50)))
+      (multiple-value-bind (posts count offset) (ningle-tutorial-project/models:posts user :offset (* (1- page) limit) :limit limit)
+        (let* ((page (1+ (floor offset limit)))
+               (page-count (max 1 (ceiling count limit)))
+               (prev-page (when (> page 1) (1- page)))
+               (next-page (when (< page page-count) (1+ page)))
+               (range-start (max 1 (- page 2)))
+               (range-end (min page-count (+ page 2))))
+          (djula:render-template*
+            "main/index.html"
+            nil
+            :title "Home"
+            :user user
+            :posts posts
+            :form (if user (cl-forms:find-form 'post) nil)
+            :count count
+            :page page
+            :limit limit
+            :page-count page-count
+            :prev-page prev-page
+            :next-page next-page
+            :pages (loop :for idx :from range-start :to range-end :collect idx)
+            :show-start-gap (> range-start 2)
+            :show-end-gap (< range-end (1- page-count))
+            :start-index (if (> count 0) (1+ offset) 0)
+            :end-index (if (> count 0) (min count (+ offset (length posts))) 0))))))
 
 
 (defun post-likes (params)

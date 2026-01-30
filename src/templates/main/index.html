@@ -12,6 +12,7 @@
     </div>
 
     <!-- Posts Section -->
+    {% include "partials/pagination.html" with url="/" title="Posts" %}
     <div class="row">
         <div class="col-12">
             {% for post in posts %}
@@ -48,6 +49,7 @@
             {% endif %}
         </div>
     </div>
+    {% include "partials/pagination.html" with url="/" title="Posts" %}
 </div>
 {% endblock %}
 

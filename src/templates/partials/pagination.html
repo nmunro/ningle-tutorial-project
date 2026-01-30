@@ -1,0 +1,62 @@
+{% if page-count > 1 %}
+  <div class="table-pagination">
+    <div class="pagination-summary">
+      Showing {{ start-index }}-{{ end-index }} of {{ count }}
+    </div>
+    <nav aria-label="{{ title }} pagination">
+      <ul class="pagination">
+        <li class="page-item{% if not prev-page %} disabled{% endif %}">
+          {% if prev-page %}
+            <a class="page-link" href="{{ url }}?page={{ prev-page }}&limit={{ limit }}">Prev</a>
+          {% else %}
+            <span class="page-link">Prev</span>
+          {% endif %}
+        </li>
+
+        <li class="page-item{% if page == 1 %} active{% endif %}">
+          {% if page == 1 %}
+            <span class="page-link">1</span>
+          {% else %}
+            <a class="page-link" href="{{ url }}?page=1&limit={{ limit }}">1</a>
+          {% endif %}
+        </li>
+
+        {% if show-start-gap %}
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+
+        {% for p in pages %}
+          {% if p != 1 and p != page-count %}
+            <li class="page-item{% if p == page %} active{% endif %}">
+              {% if p == page %}
+                <span class="page-link">{{ p }}</span>
+              {% else %}
+                <a class="page-link" href="{{ url }}?page={{ p }}&limit={{ limit }}">{{ p }}</a>
+              {% endif %}
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        {% if show-end-gap %}
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+
+        <li class="page-item{% if page == page-count %} active{% endif %}">
+          {% if page == page-count %}
+            <span class="page-link">{{ page-count }}</span>
+          {% else %}
+            <a class="page-link" href="{{ url }}?page={{ page-count }}&limit={{ limit }}">{{ page-count }}</a>
+          {% endif %}
+        </li>
+
+        <li class="page-item{% if not next-page %} disabled{% endif %}">
+          {% if next-page %}
+            <a class="page-link" href="{{ url }}?page={{ next-page }}&limit={{ limit }}">Next</a>
+          {% else %}
+            <span class="page-link">Next</span>
+          {% endif %}
+        </li>
+      </ul>
+    </nav>
+  </div>
+{% endif %}

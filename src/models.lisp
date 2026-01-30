@@ -85,31 +85,45 @@
 (defmethod liked-post-p ((ningle-auth/models:user user) (post post))
   (mito:find-dao 'likes :user user :post post))
 
-(defgeneric posts (user)
+(defgeneric posts (user &key offset limit count)
   (:documentation "Gets the posts"))
 
-(defmethod posts ((user user))
-    (mito:retrieve-by-sql
-        (sxql:yield
-            (sxql:select
-                (:post.*
-                  (:as :user.username :username)
-                  (:as (:count :likes.id) :like_count)
-                  (:as (:count :user_likes.id) :liked_by_user))
-                (sxql:from :post)
-                (sxql:left-join :user :on (:= :post.user_id :user.id))
-                (sxql:left-join :likes :on (:= :post.id :likes.post_id))
-                (sxql:left-join (:as :likes :user_likes)
-                                :on (:and (:= :post.id :user_likes.post_id)
-                                          (:= :user_likes.user_id :?)))
-                (sxql:group-by :post.id)
-                (sxql:order-by (:desc :post.created_at))
-                (sxql:limit 50)))
-            :binds (list (mito:object-id user))))
+(defmethod posts :around (user &key (offset 0) (limit 50) &allow-other-keys)
+  (let ((count (mito:count-dao 'post))
+        (offset (max 0 offset))
+        (limit (max 1 limit)))
+    (if (and (> count 0) (>= offset count))
+      (let* ((page-count (max 1 (ceiling count limit)))
+             (corrected-offset (* (1- page-count) limit)))
+        (posts user :offset corrected-offset :limit limit))
+      (call-next-method user :offset offset :limit limit :count count))))
 
-(defmethod posts ((user null))
-    (mito:retrieve-by-sql
+(defmethod posts ((user user) &key offset limit count)
+  (multiple-value-bind (sql params)
         (sxql:yield
+              (sxql:select
+                  (:post.*
+                    (:as :user.username :username)
+                    (:as (:count :likes.id) :like_count)
+                    (:as (:count :user_likes.id) :liked_by_user))
+                  (sxql:from :post)
+                  (sxql:left-join :user :on (:= :post.user_id :user.id))
+                  (sxql:left-join :likes :on (:= :post.id :likes.post_id))
+                  (sxql:left-join (:as :likes :user_likes)
+                                  :on (:and (:= :post.id :user_likes.post_id)
+                                            (:= :user_likes.user_id (mito:object-id user))))
+                  (sxql:group-by :post.id)
+                  (sxql:order-by (:desc :post.created_at))
+                  (sxql:offset offset)
+                  (sxql:limit limit)))
+      (values
+          (mito:retrieve-by-sql sql :binds params)
+          count
+          offset)))
+
+(defmethod posts ((user null) &key offset limit count)
+  (multiple-value-bind (sql)
+      (sxql:yield
         (sxql:select
             (:post.*
               (:as :user.username :username)
@@ -119,4 +133,9 @@
             (sxql:left-join :likes :on (:= :post.id :likes.post_id))
             (sxql:group-by :post.id)
             (sxql:order-by (:desc :post.created_at))
-            (sxql:limit 50)))))
+            (sxql:limit limit)
+            (sxql:offset offset)))
+    (values
+        (mito:retrieve-by-sql sql)
+        count
+        offset)))
