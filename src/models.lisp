@@ -85,20 +85,10 @@
 (defmethod liked-post-p ((ningle-auth/models:user user) (post post))
   (mito:find-dao 'likes :user user :post post))
 
-(defgeneric posts (user &key offset limit count)
+(defgeneric posts (user &key offset limit)
   (:documentation "Gets the posts"))
 
-(defmethod posts :around (user &key (offset 0) (limit 50) &allow-other-keys)
-  (let ((count (mito:count-dao 'post))
-        (offset (max 0 offset))
-        (limit (max 1 limit)))
-    (if (and (> count 0) (>= offset count))
-      (let* ((page-count (max 1 (ceiling count limit)))
-             (corrected-offset (* (1- page-count) limit)))
-        (posts user :offset corrected-offset :limit limit))
-      (call-next-method user :offset offset :limit limit :count count))))
-
-(defmethod posts ((user user) &key offset limit count)
+(defmethod posts ((user user) &key offset limit)
   (multiple-value-bind (sql params)
         (sxql:yield
               (sxql:select
@@ -117,11 +107,10 @@
                   (sxql:offset offset)
                   (sxql:limit limit)))
       (values
-          (mito:retrieve-by-sql sql :binds params)
-          count
-          offset)))
+        (mito:retrieve-by-sql sql :binds params)
+        (mito:count-dao 'post))))
 
-(defmethod posts ((user null) &key offset limit count)
+(defmethod posts ((user null) &key offset limit)
   (multiple-value-bind (sql)
       (sxql:yield
         (sxql:select
@@ -136,6 +125,5 @@
             (sxql:limit limit)
             (sxql:offset offset)))
     (values
-        (mito:retrieve-by-sql sql)
-        count
-        offset)))
+      (mito:retrieve-by-sql sql)
+      (mito:count-dao 'post))))

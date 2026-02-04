@@ -30,6 +30,7 @@
 
 (defun start (&key (server :woo) (address "127.0.0.1") (port 8000))
     (djula:add-template-directory (asdf:system-relative-pathname :ningle-tutorial-project "src/templates/"))
+    (djula:add-template-directory (asdf:system-relative-pathname :mito-pager "src/templates/"))
     (djula:set-static-url "/public/")
     (clack:clackup
      (lack.builder:builder (envy-ningle:build-middleware :ningle-tutorial-project/config *app*))

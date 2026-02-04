@@ -16,7 +16,8 @@
                :mito
                :mito-auth
                :ningle
-               :ningle-auth)
+               :ningle-auth
+               :mito-pager)
   :components ((:module "src"
                 :components
                 ((:file "contrib")
